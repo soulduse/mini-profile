@@ -30,9 +30,35 @@
             color: #fff;
         }
 
+       /* 산타 버튼 스타일 추가 */
+        .santa-button {
+            position: absolute;
+            right: -10px;
+            top: -5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .santa-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
         .profile-container {
             text-align: center;
             margin-bottom: 48px;
+            position: relative;  /* 추가 */
+            width: fit-content;  /* 추가 */
+            margin: 0 auto 48px;  /* 수정 */
         }
 
         .profile-image {
@@ -247,6 +273,8 @@
             <div class="profile-image">
                 <img src="/assets/images/blog_icon.png" alt="Profile">
             </div>
+            
+            <a href="https://programmingzombie.com/christmas" class="santa-button" onclick="trackClick('profile', 'santa_button')">🎅</a>
             <h1 class="profile-name">프로그래밍좀비</h1>
             <p class="profile-description">300개의 앱으로 퇴사를 이룬 개발자</p>
             <p class="profile-description">경제적 자유를 위해 현재도 꾸준히 앱 개발중!</p>

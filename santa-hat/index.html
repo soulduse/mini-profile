@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 크롭 & 산타모자 서비스</title>
+    <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #c0392b;
+            --green-color: #27ae60;
+            --background-color: #ecf0f1;
+            --card-background: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
+            max-width: 100vw;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--accent-color);
+            margin-bottom: 1.5em;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            margin-bottom: 1em;
+            font-weight: 600;
+        }
+
+        .section {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--green-color);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        }
+
+        .controls {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: var(--primary-color);
+            min-width: 100px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: #dfe6e9;
+            border-radius: 3px;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--green-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px dashed #bdc3c7;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .canvas-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        /* 크리스마스 장식 요소 */
+        .christmas-decoration {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .section {
+                padding: 15px;
+                margin-bottom: 20px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .canvas-container {
+                max-width: 100%;
+                height: auto;
+                aspect-ratio: 1/1;
+            }
+
+            #finalCanvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .controls {
+                padding: 15px;
+            }
+
+            .control-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .control-group label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            input[type="range"] {
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+                margin: 5px 0;
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+
+        #santaHat {
+            position: absolute;
+            pointer-events: auto;
+            transform-origin: center center;
+            cursor: move;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            z-index: 100;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            width: 300px;
+            height: 300px;
+            background-color: transparent;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>이미지 크롭 & 산타모자 서비스</h1>
+
+        <div class="section">
+            <h2>1. 이미지 업로드</h2>
+            <input type="file" id="imageInput" accept="image/*">
+            <br><br>
+            <img id="uploadedImage" style="max-width:100%; display:none;" alt="Uploaded">
+        </div>
+
+        <div class="section">
+            <h2>2. 크롭하기</h2>
+            <div style="width:300px;">
+                <img id="cropImage" style="max-width:100%; display:none;" alt="To Crop">
+            </div>
+            <button id="cropBtn">크롭하기</button>
+            <p>크롭을 위해 이미지를 드래그하고 크기 조정. 비율은 1:1</p>
+        </div>
+
+        <div class="section">
+            <h2>3. 크롭 결과 확인 & 산타모자 위치 조정</h2>
+            <div class="canvas-container" style="width: 300px; height: 300px; position: relative;">
+                <canvas id="finalCanvas" width="300" height="300"></canvas>
+                <img id="santaHat" alt="Santa Hat" src="/christmas/santa_hat.png" crossorigin="anonymous">
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>크기 조절: </label>
+                    <input type="range" id="sizeSlider" min="30" max="200" value="80">
+                </div>
+                <div class="control-group">
+                    <label>회전: </label>
+                    <input type="range" id="rotateSlider" min="0" max="360" value="0">
+                </div>
+                <div class="control-group">
+                    <button id="flipBtn">좌우반전</button>
+                    <button id="resetBtn">모자 초기화</button>
+                </div>
+            </div>
+            <p>Canvas 상에서 모자를 드래그해 위치를 조정하세요.</p>
+        </div>
+
+        <div class="section">
+            <h2>4. 저장하기</h2>
+            <button id="saveBtn">최종 이미지 다운로드</button>
+        </div>
+    </div>
+
+    <div class="christmas-decoration" style="top: 20px; left: 10%">❄️</div>
+    <div class="christmas-decoration" style="top: 50px; right: 15%">🎄</div>
+    <div class="christmas-decoration" style="bottom: 30px; left: 20%">🎅</div>
+
+    <script src="https://unpkg.com/cropperjs"></script>
+    <script>
+        let cropper;
+        const imageInput = document.getElementById('imageInput');
+        const uploadedImage = document.getElementById('uploadedImage');
+        const cropImage = document.getElementById('cropImage');
+        const cropBtn = document.getElementById('cropBtn');
+        const finalCanvas = document.getElementById('finalCanvas');
+        const ctx = finalCanvas.getContext('2d');
+        const santaHat = document.getElementById('santaHat');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const rotateSlider = document.getElementById('rotateSlider');
+        const flipBtn = document.getElementById('flipBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // 상태 변수들
+        let hatX = 150;
+        let hatY = 50;
+        let isDragging = false;
+        let offsetX, offsetY;
+        let croppedImageData;
+        let hatSize = 80;
+        let hatRotation = 0;
+        let isFlipped = false;
+
+        // 이미지 업로드 처리
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5000000) { // 5MB 제한
+                    alert('파일 크기가 너무 큽니다. 5MB 이하의 이미지를 선택해주세요.');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // 이미지 크기 최적화
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > MAX_WIDTH) {
+                            height = Math.round((height * MAX_WIDTH) / width);
+                            width = MAX_WIDTH;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 최적화된 이미지로 업데이트
+                        uploadedImage.src = canvas.toDataURL('image/jpeg', 0.8);
+                        uploadedImage.style.display = 'block';
+                        
+                        cropImage.src = canvas.toDataURL('image/jpeg', 0.8);
+                        cropImage.style.display = 'block';
+                        
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        cropper = new Cropper(cropImage, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            autoCropArea: 1,
+                        });
+                    };
+                    img.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 크롭 버튼 클릭 처리
+        cropBtn.addEventListener('click', function() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas({
+                width: 300,
+                height: 300,
+            });
+            croppedImageData = canvas.toDataURL('image/png');
+            drawFinalCanvas();
+            santaHat.style.display = 'block';
+        });
+
+        // 캔버스 그리기 함수
+        function drawFinalCanvas() {
+            if (!croppedImageData) return;
+
+            const baseImg = new Image();
+            baseImg.onload = () => {
+                // 캔버스 초기화
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, finalCanvas.width, finalCanvas.height);
+                
+                // 기본 이미지 그리기
+                ctx.drawImage(baseImg, 0, 0, finalCanvas.width, finalCanvas.height);
+            };
+            baseImg.src = croppedImageData;
+        }
+
+        // 산타 모자 변형 업데이트 함수
+        function updateHatTransform() {
+            const rotation = `rotate(${hatRotation}deg)`;
+            const scale = `scale(${isFlipped ? -1 : 1}, 1)`;
+            santaHat.style.transform = `translate(-50%, -50%) ${rotation} ${scale}`;
+            santaHat.style.width = `${hatSize}px`;
+            santaHat.style.left = `${hatX}px`;
+            santaHat.style.top = `${hatY}px`;
+            santaHat.style.touchAction = 'none';  // 터치 동작 비활성화
+            santaHat.style.webkitUserSelect = 'none';  // 선택 방지
+            santaHat.style.userSelect = 'none';  // 선택 방지
+        }
+
+        // 드래그 이벤트 처리
+        function startDrag(e) {
+            e.preventDefault(); // 기본 동작 방지
+            const rect = finalCanvas.getBoundingClientRect();
+            const isTouchEvent = e.type.includes('touch');
+            
+            if (isTouchEvent) {
+                const touch = e.touches[0];
+                offsetX = touch.clientX - rect.left - hatX;
+                offsetY = touch.clientY - rect.top - hatY;
+            } else {
+                offsetX = e.clientX - rect.left - hatX;
+                offsetY = e.clientY - rect.top - hatY;
+            }
+            
+            isDragging = true;
+            santaHat.style.zIndex = '1000'; // 드래그 중 z-index 증가
+        }
+
+        function doDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            const rect = finalCanvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.type.includes('touch')) {
+                // 터치 이벤트일 경우
+                const touch = e.touches[0];
+                clientX = touch.clientX;
+                clientY = touch.clientY;
+            } else {
+                // 마우스 이벤트일 경우
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // 캔버스 영역 내로 제한
+            hatX = Math.min(Math.max(clientX - rect.left - offsetX, 0), rect.width);
+            hatY = Math.min(Math.max(clientY - rect.top - offsetY, 0), rect.height);
+            
+            updateHatTransform();
+        }
+
+        function endDrag() {
+            isDragging = false;
+            santaHat.style.zIndex = '100';
+        }
+
+        // 컨트롤 이벤트 처리
+        sizeSlider.addEventListener('input', function(e) {
+            hatSize = parseInt(e.target.value);
+            updateHatTransform();
+        });
+
+        rotateSlider.addEventListener('input', function(e) {
+            hatRotation = parseInt(e.target.value);
+            updateHatTransform();
+        });
+
+        flipBtn.addEventListener('click', function() {
+            isFlipped = !isFlipped;
+            updateHatTransform();
+        });
+
+        resetBtn.addEventListener('click', function() {
+            hatX = 150;
+            hatY = 50;
+            hatSize = 80;
+            hatRotation = 0;
+            isFlipped = false;
+            sizeSlider.value = 80;
+            rotateSlider.value = 0;
+            updateHatTransform();
+        });
+
+        // 저장 버튼 이벤트 처리
+        saveBtn.addEventListener('click', async function() {
+            const container = document.querySelector('.canvas-container');
+            try {
+                // html2canvas 옵션 추가
+                const canvas = await html2canvas(container, {
+                    useCORS: true,            // CORS 활성화
+                    allowTaint: true,         // 외부 이미지 허용
+                    backgroundColor: null,     // 배경색 투명하게
+                    scale: window.devicePixelRatio, // 화면 비율 맞추기
+                    logging: true,            // 디버깅을 위한 로깅
+                    onclone: function(clonedDoc) {
+                        // 클론된 엘리먼트에서 산타모자의 스타일을 유지
+                        const clonedHat = clonedDoc.getElementById('santaHat');
+                        if (clonedHat) {
+                            clonedHat.style.display = santaHat.style.display;
+                            clonedHat.style.transform = santaHat.style.transform;
+                            clonedHat.style.left = santaHat.style.left;
+                            clonedHat.style.top = santaHat.style.top;
+                            clonedHat.style.width = santaHat.style.width;
+                        }
+                    }
+                });
+
+                // 새로운 캔버스에 복사
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = 300;
+                finalCanvas.height = 300;
+                const ctx = finalCanvas.getContext('2d');
+                
+                // 원본 이미지 그리기
+                ctx.drawImage(canvas, 0, 0, 300, 300);
+
+                // 이미지 품질을 최대로 설정하여 저장
+                const dataURL = finalCanvas.toDataURL('image/png', 1.0);
+                const link = document.createElement('a');
+                link.download = 'santa_photo.png';
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+        } catch (error) {
+            console.error('이미지 저장 중 오류 발생:', error);
+            alert('이미지를 저장하는 중 오류가 발생했습니다.');
+        }
+    });
+
+    // 페이지 로드 시 이벤트 리스너 초기화
+    window.addEventListener('load', function() {
+        initializeEventListeners();
+        updateHatTransform();
+    });
+
+    // 모바일 터치 이벤트 개선
+    function handleTouchStart(e) {
+        if (e.target === santaHat) {
+            e.preventDefault(); // 산타 모자 터치시만 기본 동작 방지
+            startDrag(e);
+        }
+    }
+
+    function handleTouchMove(e) {
+        if (isDragging) {
+            e.preventDefault();
+            doDrag(e);
+        }
+    }
+
+    // 이벤트 리스너 수정
+    santaHat.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', endDrag);
+
+    // 뷰포트 높이 조정 (모바일 브라우저 주소창 고려)
+    function setViewportHeight() {
+        let vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    // 초기 실행 및 리사이즈 시 뷰포트 높이 재조정
+    window.addEventListener('load', setViewportHeight);
+    window.addEventListener('resize', setViewportHeight);
+
+    // 모바일에서 더블탭 줌 방지
+    document.addEventListener('dblclick', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+
+    // 핀치 줌 방지 (필요한 경우에만 ���용)
+    document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+
+    // 이벤트 리스너 재설정
+    function initializeEventListeners() {
+        // 기존 이벤트 리스너 제거
+        santaHat.removeEventListener('mousedown', startDrag);
+        santaHat.removeEventListener('touchstart', startDrag);
+        document.removeEventListener('mousemove', doDrag);
+        document.removeEventListener('touchmove', doDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchend', endDrag);
+
+        // 새로운 이벤트 리스너 추가
+        santaHat.addEventListener('mousedown', startDrag, { passive: false });
+        santaHat.addEventListener('touchstart', startDrag, { passive: false });
+        
+        document.addEventListener('mousemove', doDrag, { passive: false });
+        document.addEventListener('touchmove', doDrag, { 
+            passive: false,
+            capture: true  // 이벤트 캡처링 사용
+        });
+        
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+        
+        // 터치 취소 이벤트 추가
+        document.addEventListener('touchcancel', endDrag);
+    }
+
+    // 스크롤 방지가 필요한 영역에만 적용
+    const canvasContainer = document.querySelector('.canvas-container');
+    canvasContainer.addEventListener('touchmove', function(e) {
+        if (isDragging) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    </script>
+</body>
+</html>
