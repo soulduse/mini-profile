@@ -264,6 +264,21 @@
                 'event_label': label
             });
         }
+
+        // 이벤트 전송 후 페이지 이동하는 헬퍼 함수
+        function gtagSendEvent(url, eventName, eventParams) {
+            var callback = function () {
+                if (typeof url === 'string') {
+                    window.location = url;
+                }
+            };
+            gtag('event', eventName, {
+                'event_callback': callback,
+                'event_timeout': 500,
+                ...eventParams
+            });
+            return false;
+        }
     </script>
 </head>
 <body>
@@ -291,7 +306,7 @@
         <!-- Product Section -->
         <div class="mb-8">
             <h2 class="section-title">Product</h2>
-            <a href="https://inf.run/4U2KE" onclick="trackClick('product', 'inflearn_course')" class="block">
+            <a href="https://inf.run/4U2KE" onclick="return gtagSendEvent(this.href, 'inflearn_course', {event_category: 'product', event_label: 'inflearn_course'})" class="block">
                 <div class="link-preview-card">
                     <div class="link-preview-content">
                         <div class="link-preview-image">
