@@ -257,19 +257,11 @@
         gtag('js', new Date());
         gtag('config', 'G-F4XSYDTBVT'); // 여기에 실제 GA4 측정 ID를 넣으세요
 
-        // 링크 클릭 이벤트 추적 함수
-        function trackClick(category, label) {
-            gtag('event', 'click', {
-                'event_category': category,
-                'event_label': label
-            });
-        }
-
-        // 이벤트 전송 후 페이지 이동하는 헬퍼 함수
+        // 이벤트 전송 후 새 창에서 페이지 여는 헬퍼 함수
         function gtagSendEvent(url, eventName, eventParams) {
             var callback = function () {
                 if (typeof url === 'string') {
-                    window.location = url;
+                    window.open(url, '_blank', 'noopener,noreferrer');
                 }
             };
             gtag('event', eventName, {
@@ -289,7 +281,7 @@
                 <img src="/assets/images/blog_icon.png" alt="Profile">
             </div>
             
-            <a href="https://programmingzombie.com/christmas" class="santa-button" onclick="trackClick('profile', 'santa_button')">🎅</a>
+            <a href="https://programmingzombie.com/christmas" class="santa-button" onclick="return gtagSendEvent(this.href, 'santa_button', {event_category: 'profile', event_label: 'santa_button'})" target="_blank" rel="noopener noreferrer">🎅</a>
             <h1 class="profile-name">프로그래밍좀비</h1>
             <p class="profile-description">300개의 앱으로 퇴사를 이룬 개발자</p>
             <p class="profile-description">경제적 자유를 위해 현재도 꾸준히 앱 개발중!</p>
@@ -297,10 +289,10 @@
 
         <!-- Navigation Links -->
         <div class="nav-links">
-            <a href="https://soulduse.tistory.com/" onclick="trackClick('nav', 'blog')">Blog</a>
-            <a href="https://www.threads.net/@programmingzombie" onclick="trackClick('nav', 'threads')">Threads</a>
-            <a href="https://x.com/gimhyeo02389130" onclick="trackClick('nav', 'x')">X</a>
-            <a href="https://github.com/soulduse" onclick="trackClick('nav', 'github')">Github</a>
+            <a href="https://soulduse.tistory.com/" onclick="return gtagSendEvent(this.href, 'blog', {event_category: 'nav', event_label: 'blog'})" target="_blank" rel="noopener noreferrer">Blog</a>
+            <a href="https://www.threads.net/@programmingzombie" onclick="return gtagSendEvent(this.href, 'threads', {event_category: 'nav', event_label: 'threads'})" target="_blank" rel="noopener noreferrer">Threads</a>
+            <a href="https://x.com/gimhyeo02389130" onclick="return gtagSendEvent(this.href, 'x', {event_category: 'nav', event_label: 'x'})" target="_blank" rel="noopener noreferrer">X</a>
+            <a href="https://github.com/soulduse" onclick="return gtagSendEvent(this.href, 'github', {event_category: 'nav', event_label: 'github'})" target="_blank" rel="noopener noreferrer">Github</a>
         </div>
 
         <!-- Product Section -->
@@ -321,7 +313,7 @@
                     </div>
                 </div>
             </a>
-            <a href="https://admob.pro/" onclick="trackClick('product', 'admob_pro')" class="block mt-6">
+            <a href="https://admob.pro/" onclick="return gtagSendEvent(this.href, 'admob_pro', {event_category: 'product', event_label: 'admob_pro'})" class="block mt-6" target="_blank" rel="noopener noreferrer">
                 <div class="link-preview-card">
                     <div class="link-preview-content">
                         <div class="link-preview-image" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);">
@@ -347,7 +339,7 @@
             <h2 class="section-title">Contents</h2>
             
             <!-- 첫 번째 링크 프리뷰 -->
-            <a href="https://soulduse.tistory.com/155" onclick="trackClick('content', 'blog_post_1')" class="block">
+            <a href="https://soulduse.tistory.com/155" onclick="return gtagSendEvent(this.href, 'blog_post_1', {event_category: 'content', event_label: 'blog_post_1'})" class="block" target="_blank" rel="noopener noreferrer">
                 <div class="link-preview-card">
                     <div class="link-preview-content">
                         <div class="link-preview-image">
@@ -364,7 +356,7 @@
             </a>
 
             <!-- 두 번째 링크 프리뷰 -->
-            <a href="https://eopla.net/magazines/23015#" onclick="trackClick('content', 'eopla_interview')" class="block">
+            <a href="https://eopla.net/magazines/23015#" onclick="return gtagSendEvent(this.href, 'eopla_interview', {event_category: 'content', event_label: 'eopla_interview'})" class="block" target="_blank" rel="noopener noreferrer">
                 <div class="link-preview-card">
                     <div class="link-preview-content">
                         <div class="link-preview-image">
@@ -381,7 +373,7 @@
             </a>
 
             <!-- 세 번째 링크 프리뷰 -->
-            <a href="https://soulduse.tistory.com/138" onclick="trackClick('content', 'blog_post_2')" class="block">
+            <a href="https://soulduse.tistory.com/138" onclick="return gtagSendEvent(this.href, 'blog_post_2', {event_category: 'content', event_label: 'blog_post_2'})" class="block" target="_blank" rel="noopener noreferrer">
                 <div class="link-preview-card">
                     <div class="link-preview-content">
                         <div class="link-preview-image">
@@ -398,7 +390,7 @@
             </a> 
 
             <!-- 네 번째 링크 프리뷰 -->
-            <a href="https://soulduse.tistory.com/106" onclick="trackClick('content', 'blog_post_3')" class="block">
+            <a href="https://soulduse.tistory.com/106" onclick="return gtagSendEvent(this.href, 'blog_post_3', {event_category: 'content', event_label: 'blog_post_3'})" class="block" target="_blank" rel="noopener noreferrer">
                 <div class="link-preview-card">
                     <div class="link-preview-content">
                         <div class="link-preview-image">
@@ -416,7 +408,7 @@
         </div>
 
         <!-- GitHub Contributions Section -->
-        <a href="https://github.com/soulduse" onclick="trackClick('profile', 'github_contributions')" class="block">
+        <a href="https://github.com/soulduse" onclick="return gtagSendEvent(this.href, 'github_contributions', {event_category: 'profile', event_label: 'github_contributions'})" class="block" target="_blank" rel="noopener noreferrer">
             <div class="github-contributions">
                 <h2 class="section-title">GitHub Contributions</h2>
                 <!-- GitHub 공식 Embed -->
