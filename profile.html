@@ -249,13 +249,20 @@
         }
     </style>
 
-    <!-- Google Analytics -->
+    <!-- Google Analytics & Google Ads -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F4XSYDTBVT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-F4XSYDTBVT'); // 여기에 실제 GA4 측정 ID를 넣으세요
+
+        gtag('config', 'G-F4XSYDTBVT');
+
+        gtag('config', 'AW-16539271317');
+
+        gtag('event', 'conversion', {
+            'send_to': 'AW-16539271317/HKFFCMm_5OwZEJWBxc49'
+        });
 
         // 이벤트 전송 후 새 창에서 페이지 여는 헬퍼 함수
         function gtagSendEvent(url, eventName, eventParams) {
@@ -264,6 +271,7 @@
                     window.open(url, '_blank', 'noopener,noreferrer');
                 }
             };
+            // GA4로 이벤트 전송
             gtag('event', eventName, {
                 'event_callback': callback,
                 'event_timeout': 500,
