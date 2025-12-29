@@ -6,5 +6,12 @@
       "Bash(git commit:*)"
     ],
     "deny": []
-  }
+  },
+  "disabledMcpjsonServers": [
+    "arjunkmrm-perplexity-search",
+    "brave",
+    "exa",
+    "smithery-ai-server-sequential-thinking",
+    "upstash-context-7-mcp"
+  ]
 }
